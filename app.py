@@ -40,13 +40,16 @@ elif menu == "Latency Analysis":
     fig.update_layout(template="plotly_dark")
     st.plotly_chart(fig, use_container_width=True)
 
-# --- 4. Order Book & Packets (CLEANED VERSION) ---
+# --- 4. Order Book & Packets (CRITICAL FIX HERE) ---
 elif menu == "Order Book & Packets":
     st.header("Live Order Book (L2 Depth)")
     col1, col2 = st.columns()
     with col1:
-        # One-line list definitions are the safest against SyntaxErrors
-        df_ladder = pd.DataFrame({"Price": [150.10, 150.09, 150.08, 150.07, 150.06], "Size":})
+        # Define lists separately to avoid dictionary syntax errors
+        price_list = [150.10, 150.09, 150.08, 150.07, 150.06]
+        size_list =
+        # Create DataFrame using the pre-defined lists
+        df_ladder = pd.DataFrame({"Price": price_list, "Size": size_list})
         st.table(df_ladder)
     with col2:
         st.subheader("Raw Packet Stream (Parser View)")
