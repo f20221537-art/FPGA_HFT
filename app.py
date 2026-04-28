@@ -104,19 +104,20 @@ elif menu == "Order Book & Packets":
     col1, col2 = st.columns()
     
     with col1:
-        # Mock Ladder
-        df = pd.DataFrame({
+        # Mock Ladder Data - Ensure no hidden spaces exist here
+        ladder_data = {
             'Price': [150.10, 150.09, 150.08, 150.07, 150.06],
             'Size':
-        })
+        }
+        df = pd.DataFrame(ladder_data)
         st.table(df)
         
     with col2:
         st.subheader("Raw Packet Stream (Parser View)")
         st.code("""
-        [RX] 0x48 0x65 0x6c 0x6c 0x6f ... ID: 8829 | T: 14:02:01.000342
-        [TX] 0x5a 0x21 0x0c 0x00 0x12 ... NEW ORDER | T: 14:02:01.000343
-        [RX] 0x48 0x65 0x6c 0x6c 0x6f ... ID: 8830 | T: 14:02:01.000345
+[RX] 0x48 0x65 0x6c 0x6c 0x6f ... ID: 8829 | T: 14:02:01.000342
+[TX] 0x5a 0x21 0x0c 0x00 0x12 ... NEW ORDER | T: 14:02:01.000343
+[RX] 0x48 0x65 0x6c 0x6c 0x6f ... ID: 8830 | T: 14:02:01.000345
         """, language="bash")
 
 # --- 5. Hardware Health ---
