@@ -98,3 +98,33 @@ if run_sim:
             time.sleep(0.2)
 else:
     st.info("Adjust the FPGA clock parameters in the sidebar and click 'Execute Pipeline' to begin.")
+
+# --- HARDWARE ANIMATION MENU ---
+st.sidebar.markdown("---")
+st.sidebar.subheader("Visualization Settings")
+anim_speed = st.sidebar.select_slider("Animation Speed", options=["Slow", "Normal", "Fast"], value="Normal")
+speed_map = {"Slow": 0.5, "Normal": 0.1, "Fast": 0.01}
+
+def hardware_logic_animation():
+    st.subheader("FPGA Register Transfer Level (RTL) View")
+    
+    # Create a grid to represent LUTs (Look-Up Tables) or Flip-Flops
+    cols = st.columns(8)
+    for i in range(8):
+        with cols[i]:
+            # Simulate a "pulsing" bit in a register
+            is_active = np.random.choice([True, False], p=[0.3, 0.7])
+            color = "#00FF00" if is_active else "#333333"
+            st.markdown(
+                f"""<div style="width:100%; height:40px; background-color:{color}; 
+                border-radius:4px; border: 1px solid #555; text-align:center; line-height:40px; color:white; font-size:10px;">
+                REG_{i}</div>""", 
+                unsafe_allow_html=True
+            )
+
+    # Simulated Data Bus
+    st.markdown("### Data Bus (AXI4-Stream)")
+    bus_data = "".join([np.random.choice(["0", "1"]) for _ in range(64)])
+    st.code(f"TX_DATA: {bus_data}", language="bash")
+
+# Call this inside your 'if run_sim' loop
