@@ -5,126 +5,105 @@ import time
 import plotly.graph_objects as go
 from datetime import datetime
 
-# Page Configuration - Must be the first Streamlit command
-st.set_page_config(
-    page_title="FPGA HFT Monitor", 
-    page_icon="⚡", 
-    layout="wide"
-)
+# --- GLOBAL CONFIG ---
+st.set_page_config(page_title="FPGA HFT Pro", layout="wide", page_icon="📟")
 
-# Custom CSS for a "Hardware Terminal" look
+# Custom CSS for the "Hardware Console" look
 st.markdown("""
     <style>
-    .main { background-color: #0e1117; }
-    .stMetric { background-color: #1f2937; padding: 15px; border-radius: 10px; border: 1px solid #374151; }
+    .main { background-color: #0e1117; color: #00ff41; font-family: 'Courier New', Courier, monospace; }
+    .stMetric { border: 1px solid #00ff41; padding: 10px; border-radius: 5px; background: #161b22; }
+    div[data-testid="stMetricValue"] { color: #00ff41; }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("⚡ Ultra-Low Latency FPGA HFT Pipeline")
-st.markdown("---")
+# --- SIDEBAR NAVIGATION ---
+st.sidebar.title("⚡ FPGA HFT SYSTEM")
+page = st.sidebar.radio("Navigation", ["1. Trading Pipeline", "2. Hardware Logic (RTL)", "3. Signal Integrity"])
 
-# --- SIDEBAR: HARDWARE CONTROLS ---
-st.sidebar.header("FPGA Logic Configuration")
-clock_mhz = st.sidebar.slider("Clock Speed (MHz)", 100, 450, 322) # 322MHz is standard for 10G/25G
-pipeline_depth = st.sidebar.slider("Pipeline Stages", 2, 20, 8)
-show_raw_packets = st.sidebar.toggle("Stream Raw Hex Packets", value=True)
-
-# --- SIMULATION ENGINE ---
-def simulate_fpga_processing(price, clock, stages):
-    """Calculates deterministic hardware latency."""
-    # FPGA Latency = (Cycles / Frequency) + wire delay
-    # 322MHz cycle is ~3.1ns
-    cycle_time_ns = 1000 / clock
-    logic_latency = cycle_time_ns * stages
-    # Add minimal jitter to simulate transceiver noise (0.1 - 0.5ns)
-    total_ns = logic_latency + np.random.uniform(0.1, 0.5)
-    return total_ns
-
-# Initialize Session Data
-if 'trade_log' not in st.session_state:
-    st.session_state.trade_log = pd.DataFrame(columns=['Time', 'Price', 'Latency'])
-
-# --- MAIN DASHBOARD ---
-# FIXED: Passing an integer to columns()
-col1, col2, col3 = st.columns(3)
-
-placeholder = st.empty()
-run_sim = st.sidebar.button("Execute Pipeline")
-
-if run_sim:
-    for _ in range(50):  # Run for 50 iterations
-        with placeholder.container():
-            # 1. Generate Fake Market Data
-            current_price = 150.00 + np.random.normal(0, 0.1)
-            latency = simulate_fpga_processing(current_price, clock_mhz, pipeline_depth)
-            
-            # 2. Top Level Metrics
-            m1, m2, m3 = st.columns(3)
-            m1.metric("Market Price", f"${current_price:.4f}")
-            m2.metric("Tick-to-Trade", f"{latency:.2f} ns", delta="-0.02ns", delta_color="inverse")
-            m3.metric("Link Status", "25GbE Up", delta="0 Packets Dropped")
-
-            # 3. Pipeline Visualization
-            st.write("### Internal Logic State")
-            p_cols = st.columns(4)
-            stages = ["PHY/MAC", "Parser", "Book Builder", "Strategy"]
-            for i, s in enumerate(stages):
-                p_cols[i].info(f"**{s}**\n\nProcessing...")
-
-            # 4. Latency Graph
-            new_entry = {'Time': datetime.now(), 'Price': current_price, 'Latency': latency}
-            st.session_state.trade_log = pd.concat([st.session_state.trade_log, pd.DataFrame([new_entry])]).tail(20)
-            
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=st.session_state.trade_log['Time'], 
-                y=st.session_state.trade_log['Latency'],
-                line=dict(color='#00ff00', width=2),
-                fill='tozeroy',
-                name='Latency (ns)'
-            ))
-            fig.update_layout(
-                title="Deterministic Latency Profile",
-                template="plotly_dark",
-                height=300,
-                yaxis_title="Nanoseconds",
-                margin=dict(l=20, r=20, t=40, b=20)
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-            if show_raw_packets:
-                st.caption(f"Raw Frame Trace: `0x55 0xAA {np.random.bytes(4).hex().upper()}`")
-            
-            time.sleep(0.2)
-else:
-    st.info("Adjust the FPGA clock parameters in the sidebar and click 'Execute Pipeline' to begin.")
-
-# --- HARDWARE ANIMATION MENU ---
-st.sidebar.markdown("---")
-st.sidebar.subheader("Visualization Settings")
-anim_speed = st.sidebar.select_slider("Animation Speed", options=["Slow", "Normal", "Fast"], value="Normal")
-speed_map = {"Slow": 0.5, "Normal": 0.1, "Fast": 0.01}
-
-def hardware_logic_animation():
-    st.subheader("FPGA Register Transfer Level (RTL) View")
+# --- PAGE 1: TRADING PIPELINE ---
+if page == "1. Trading Pipeline":
+    st.header("🚀 Ultra-Low Latency Pipeline")
+    st.subheader("Tick-to-Trade Simulation")
     
-    # Create a grid to represent LUTs (Look-Up Tables) or Flip-Flops
+    col1, col2, col3 = st.columns(3)
+    m1 = col1.empty()
+    m2 = col2.empty()
+    m3 = col3.empty()
+    
+    chart_placeholder = st.empty()
+    log_placeholder = st.empty()
+    
+    # Simulation Data
+    prices = [150.0]
+    latencies = # Nanoseconds
+    
+    if st.button("Start Live Stream"):
+        for i in range(30):
+            # Generate dummy HFT data
+            new_price = prices[-1] + np.random.normal(0, 0.05)
+            new_lat = 420 + np.random.uniform(-5, 5)
+            prices.append(new_price)
+            latencies.append(new_lat)
+            
+            # Metrics
+            m1.metric("Market Price", f"${new_price:.4f}")
+            m2.metric("Pipeline Latency", f"{new_lat:.2f} ns", delta="-0.02 ns", delta_color="inverse")
+            m3.metric("Throughput", "15.2M pps")
+            
+            # Chart
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(y=prices, mode='lines+markers', name='Price', line=dict(color='#00ff41')))
+            fig.update_layout(template="plotly_dark", height=300, margin=dict(l=0,r=0,t=0,b=0))
+            chart_placeholder.plotly_chart(fig, use_container_width=True)
+            
+            log_placeholder.code(f"EXECUTE ORDER: BUY 100 SHARES AT ${new_price:.4f} | RTT: {new_lat:.1f}ns")
+            time.sleep(0.1)
+
+# --- PAGE 2: HARDWARE LOGIC (RTL) ---
+elif page == "2. Hardware Logic (RTL)":
+    st.header("🧬 FPGA Gate-Level Simulation")
+    st.write("Visualizing Register Transfer Level (RTL) data movement.")
+    
     cols = st.columns(8)
-    for i in range(8):
-        with cols[i]:
-            # Simulate a "pulsing" bit in a register
-            is_active = np.random.choice([True, False], p=[0.3, 0.7])
-            color = "#00FF00" if is_active else "#333333"
-            st.markdown(
-                f"""<div style="width:100%; height:40px; background-color:{color}; 
-                border-radius:4px; border: 1px solid #555; text-align:center; line-height:40px; color:white; font-size:10px;">
-                REG_{i}</div>""", 
-                unsafe_allow_html=True
-            )
+    placeholders = [col.empty() for col in cols]
+    
+    st.markdown("### Data Bus State (AXI4-Stream)")
+    bus_log = st.empty()
 
-    # Simulated Data Bus
-    st.markdown("### Data Bus (AXI4-Stream)")
-    bus_data = "".join([np.random.choice(["0", "1"]) for _ in range(64)])
-    st.code(f"TX_DATA: {bus_data}", language="bash")
+    if st.button("Simulate Clock Cycles"):
+        for _ in range(20):
+            # Animate Register bits
+            for p in placeholders:
+                active = np.random.choice([True, False])
+                color = "#00ff41" if active else "#333"
+                p.markdown(f"""<div style="height:60px; width:100%; background:{color}; border:1px solid white; border-radius:5px;"></div>""", unsafe_allow_html=True)
+            
+            hex_data = "".join(np.random.choice(list("0123456789ABCDEF"), 16))
+            bus_log.markdown(f"`TX_DATA_BUS: 0x{hex_data} | VALID: 1 | READY: 1`")
+            time.sleep(0.2)
 
-# Call this inside your 'if run_sim' loop
+# --- PAGE 3: SIGNAL INTEGRITY ---
+elif page == "3. Signal Integrity":
+    st.header("📡 Transceiver & Link Diagnostics")
+    
+    col_left, col_right = st.columns()
+    
+    with col_left:
+        st.write("### Utilization")
+        st.progress(0.72, text="LUT Usage (72%)")
+        st.progress(0.45, text="BRAM (45%)")
+        st.progress(0.90, text="DSP Slices (90%)")
+    
+    with col_right:
+        st.write("### GT SerDes Eye Diagram (Simulated)")
+        # Simulated "Eye Diagram" for high-speed serial links
+        x = np.linspace(-1, 1, 1000)
+        y = np.sin(x*np.pi) + np.random.normal(0, 0.05, 1000)
+        
+        fig = go.Figure()
+        for i in range(10): # Overlap signals to create the "eye"
+            fig.add_trace(go.Scatter(x=x, y=y + np.random.normal(0, 0.02), mode='lines', line=dict(width=1, color='rgba(0, 255, 65, 0.3)')))
+        
+        fig.update_layout(template="plotly_dark", showlegend=False, height=400)
+        st.plotly_chart(fig, use_container_width=True)
